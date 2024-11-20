@@ -132,6 +132,37 @@
             return calendarUrl;
         }
 
+        function createIOSCalendarLink(conference) {
+            const startDate = conference.deadline.toISOString().replace(/-|:|\.\d{3}/g, "").substring(0, 15);
+            const endDate = new Date(conference.deadline.getTime() + (60 * 60 * 1000)).toISOString().replace(/-|:|\.\d{3}/g, "").substring(0, 15);
+            const calendarUrl = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${conference.name}\nDTSTART:${startDate}\nDTEND:${endDate}\nLOCATION:${conference.url}\nDESCRIPTION:Submission Deadline\nEND:VEVENT\nEND:VCALENDAR`;
+            const blob = new Blob([calendarUrl], { type: 'text/calendar' });
+            return URL.createObjectURL(blob);
+        }
+
+        function detectDevice() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            if (/windows phone/i.test(userAgent)) {
+                return "Windows";
+            }
+            if (/android/i.test(userAgent)) {
+                return "Android";
+            }
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return "iOS";
+            }
+            return "unknown";
+        }
+
+        function getCalendarLink(conference) {
+            const deviceType = detectDevice();
+            if (deviceType === "iOS") {
+                return createIOSCalendarLink(conference);
+            } else {
+                return createCalendarLink(conference);
+            }
+        }
+
         function validateConferenceData(conference) {
             return conference.hasOwnProperty('name') &&
                    conference.hasOwnProperty('url') &&
@@ -152,7 +183,7 @@
             const conferenceElement = document.createElement('div');
             conferenceElement.classList.add('conference');
             conferenceElement.innerHTML = `
-                <a href="${createCalendarLink(conference)}" target="_blank" class="conference-icon" title="Add to Calendar">
+                <a href="${getCalendarLink(conference)}" target="_blank" class="conference-icon" title="Add to Calendar">
                     <i class="fas fa-calendar-alt"></i>
                 </a>
                 <h2>${conference.name}</h2>
@@ -215,8 +246,7 @@
 
                     document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
                 } else {
-                    document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText =
-                        `Deadline has passed`;
+                    
                 }
             });
             requestAnimationFrame(() => updateCountdowns(conferences));
