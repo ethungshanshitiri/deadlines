@@ -125,6 +125,109 @@
         }
     </style>
     <script>
+        function createCalendarLink(conference) {
+            const startDate = conference.deadline.toISOString().replace(/-|:|\.\d{3}/g, "");
+            const endDate = new Date(conference.deadline.getTime() + (60 * 60 * 1000)).toISOString().replace(/-|:|\.\d{3}/g, "");
+            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(conference.name)}&dates=${startDate}/${endDate}&details=${encodeURIComponent('Submission Deadline')}&location=${encodeURIComponent(conference.url)}`;
+            return calendarUrl;
+        }
+
+        function validateConferenceData(conference) {
+            return conference.hasOwnProperty('name') &&
+                   conference.hasOwnProperty('url') &&
+                   conference.hasOwnProperty('deadline') &&
+                   conference.hasOwnProperty('conferenceDate') &&
+                   conference.hasOwnProperty('conferenceDateText');
+        }
+
+        function categorizeConferences(conferences) {
+            const now = new Date();
+            return {
+                upcoming: conferences.filter(c => c.deadline > now),
+                passedDeadlineUpcoming: conferences.filter(c => c.deadline <= now && c.conferenceDate > now),
+                past: conferences.filter(c => c.conferenceDate <= now)
+            };
+        }
+
+        function createConferenceElement(conference) {
+            const conferenceElement = document.createElement('div');
+            conferenceElement.classList.add('conference');
+            conferenceElement.innerHTML = `
+                <a href="${createCalendarLink(conference)}" target="_blank" class="conference-icon" title="Add to Calendar">
+                    <i class="fas fa-calendar-alt"></i>
+                </a>
+                <h2>${conference.name}</h2>
+                <p><a href="${conference.url}" target="_blank">Visit Conference Website</a></p>
+                <p><strong>Submission Deadline:</strong> <span>${conference.deadline.toDateString()}</span></p>
+                <p><strong>Conference Dates:</strong> ${conference.conferenceDateText}</p>
+                <p class="countdown" id="${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown"></p>
+            `;
+            return conferenceElement;
+        }
+
+        function displayConferences(container, categorizedConferences) {
+            container.innerHTML = '';
+
+            if (categorizedConferences.upcoming.length > 0) {
+                const upcomingHeader = document.createElement('h2');
+                upcomingHeader.textContent = "Upcoming Conferences";
+                upcomingHeader.style.color = '#00264d';
+                upcomingHeader.style.marginTop = '40px';
+                container.appendChild(upcomingHeader);
+                categorizedConferences.upcoming.forEach(conference => {
+                    container.appendChild(createConferenceElement(conference));
+                });
+            }
+
+            if (categorizedConferences.passedDeadlineUpcoming.length > 0) {
+                const passedHeader = document.createElement('h2');
+                passedHeader.textContent = "Conferences with Passed Deadlines but Upcoming Dates";
+                passedHeader.style.color = '#00264d';
+                passedHeader.style.marginTop = '40px';
+                container.appendChild(passedHeader);
+                categorizedConferences.passedDeadlineUpcoming.forEach(conference => {
+                    container.appendChild(createConferenceElement(conference));
+                });
+            }
+
+            if (categorizedConferences.past.length > 0) {
+                const pastHeader = document.createElement('h2');
+                pastHeader.textContent = "Past Conferences";
+                pastHeader.style.color = '#00264d';
+                pastHeader.style.marginTop = '40px';
+                container.appendChild(pastHeader);
+                categorizedConferences.past.forEach(conference => {
+                    container.appendChild(createConferenceElement(conference));
+                });
+            }
+        }
+
+        function updateCountdowns(conferences) {
+            conferences.forEach(conference => {
+                const now = new Date();
+                const timeDifference = conference.deadline - now;
+
+                if (timeDifference > 0) {
+                    const months = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30));
+                    const days = Math.floor((timeDifference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+                    let countdownText = `Time left: ${months}mo ${days}d ${hours}h ${minutes}m`;
+                    if (timeDifference < (1000 * 60 * 60)) { // Show seconds only if less than an hour left
+                        countdownText += ` ${seconds}s`;
+                    }
+
+                    document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
+                } else {
+                    document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText =
+                        `Deadline has passed`;
+                }
+            });
+            requestAnimationFrame(() => updateCountdowns(conferences));
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const conferences = [
                 {
@@ -171,103 +274,12 @@
                 }
             ];
 
-            // Sort conferences into different categories
-            const now = new Date();
-            const upcomingConferences = conferences.filter(c => c.deadline > now);
-            const passedDeadlineUpcomingConference = conferences.filter(c => c.deadline <= now && c.conferenceDate > now);
-            const pastConferences = conferences.filter(c => c.conferenceDate <= now);
-
+            const validConferences = conferences.filter(validateConferenceData);
+            const categorizedConferences = categorizeConferences(validConferences);
             const container = document.querySelector('.container');
-            container.innerHTML = '';
 
-            // Function to create calendar link
-            function createCalendarLink(conference) {
-                const startDate = conference.deadline.toISOString().replace(/-|:|\.\d{3}/g, "");
-                const endDate = new Date(conference.deadline.getTime() + (60 * 60 * 1000)).toISOString().replace(/-|:|\.\d{3}/g, "");
-                const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(conference.name)}&dates=${startDate}/${endDate}&details=${encodeURIComponent('Submission Deadline')}&location=${encodeURIComponent(conference.url)}`;
-                return calendarUrl;
-            }
-
-            // Function to create conference elements
-            function createConferenceElement(conference) {
-                const conferenceElement = document.createElement('div');
-                conferenceElement.classList.add('conference');
-                conferenceElement.innerHTML = `
-                    <a href="${createCalendarLink(conference)}" target="_blank" class="conference-icon" title="Add to Calendar">
-                        <i class="fas fa-calendar-alt"></i>
-                    </a>
-                    <h2>${conference.name}</h2>
-                    <p><a href="${conference.url}" target="_blank">Visit Conference Website</a></p>
-                    <p><strong>Submission Deadline:</strong> <span>${conference.deadline.toDateString()}</span></p>
-                    <p><strong>Conference Dates:</strong> ${conference.conferenceDateText}</p>
-                    <p class="countdown" id="${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown"></p>
-                `;
-                return conferenceElement;
-            }
-
-            // Display upcoming conferences
-            if (upcomingConferences.length > 0) {
-                const upcomingHeader = document.createElement('h2');
-                upcomingHeader.textContent = "Upcoming Conferences";
-                upcomingHeader.style.color = '#00264d';
-                upcomingHeader.style.marginTop = '40px';
-                container.appendChild(upcomingHeader);
-                upcomingConferences.forEach(conference => {
-                    container.appendChild(createConferenceElement(conference));
-                });
-            }
-
-            // Display passed deadline but yet to take place conferences
-            if (passedDeadlineUpcomingConference.length > 0) {
-                const passedHeader = document.createElement('h2');
-                passedHeader.textContent = "Conferences with Passed Deadlines but Upcoming Dates";
-                passedHeader.style.color = '#00264d';
-                passedHeader.style.marginTop = '40px';
-                container.appendChild(passedHeader);
-                passedDeadlineUpcomingConference.forEach(conference => {
-                    container.appendChild(createConferenceElement(conference));
-                });
-            }
-
-            // Display past conferences
-            if (pastConferences.length > 0) {
-                const pastHeader = document.createElement('h2');
-                pastHeader.textContent = "Past Conferences";
-                pastHeader.style.color = '#00264d';
-                pastHeader.style.marginTop = '40px';
-                container.appendChild(pastHeader);
-                pastConferences.forEach(conference => {
-                    container.appendChild(createConferenceElement(conference));
-                });
-            }
-
-            // Update countdowns
-            function updateCountdowns() {
-                upcomingConferences.forEach(conference => {
-                    const now = new Date();
-                    const timeDifference = conference.deadline - now;
-
-                    if (timeDifference > 0) {
-                        const months = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30));
-                        const days = Math.floor((timeDifference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
-                        const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-
-                        let countdownText = `Time left: ${months}mo ${days}d ${hours}h ${minutes}m`;
-                        if (timeDifference < (1000 * 60 * 60)) { // Show seconds only if less than an hour left
-                            countdownText += ` ${seconds}s`;
-                        }
-
-                        document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
-                    } else {
-                        document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText =
-                            `Deadline has passed`;
-                    }
-                });
-            }
-
-            setInterval(updateCountdowns, 1000);
+            displayConferences(container, categorizedConferences);
+            updateCountdowns(validConferences);
         });
     </script>
 </head>
