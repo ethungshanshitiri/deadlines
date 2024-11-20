@@ -195,6 +195,7 @@
                 const now = new Date();
                 const timeDifference = conference.deadline - now;
 
+                let countdownText = '';
                 if (timeDifference > 0) {
                     const months = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30));
                     const days = Math.floor((timeDifference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
@@ -202,9 +203,14 @@
                     const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
-                    let countdownText = `Time left: ${months}mo ${days}d ${hours}h ${minutes}m`;
-                    if (timeDifference < (1000 * 60 * 60)) { // Show seconds only if less than an hour left
-                        countdownText += ` ${seconds}s`;
+                    if (months > 0) {
+                        countdownText = `Time left: ${months}mo ${days}d`;
+                    } else if (days > 0) {
+                        countdownText = `Time left: ${days}d ${hours}h`;
+                    } else if (hours > 0) {
+                        countdownText = `Time left: ${hours}h ${minutes}m`;
+                    } else {
+                        countdownText = `Time left: ${minutes}m ${seconds}s`;
                     }
 
                     document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
