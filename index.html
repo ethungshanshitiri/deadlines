@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Submission Deadlines Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@300;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9fafc;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(to right, #1d3557, #457b9d);
+            color: #fff;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        header h1 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 2.5em;
+            letter-spacing: 1px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .conference {
+            margin-bottom: 40px;
+            border: 1px solid #e1e5ea;
+            padding: 30px;
+            border-radius: 15px;
+            background: #ffffff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        .conference:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+        }
+        .conference h2 {
+            margin-bottom: 15px;
+            color: #1d3557;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 600;
+            font-size: 1.8em;
+        }
+        .conference a {
+            color: #e63946;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+        .conference a:hover {
+            color: #457b9d;
+            text-decoration: underline;
+        }
+        .conference p {
+            margin: 15px 0;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+        .countdown {
+            font-size: 1.2em;
+            color: #e63946;
+            font-weight: bold;
+        }
+        .conference-icon {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background-color: #457b9d;
+            color: #fff;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .conference-icon:hover {
+            background-color: #1d3557;
+        }
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2em;
+            }
+            .conference {
+                padding: 20px;
+            }
+            .conference h2 {
+                font-size: 1.6em;
+            }
+            .container {
+                padding: 0 15px;
+            }
+        }
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 2em;
+            }
+            .conference {
+                padding: 15px;
+            }
+            .conference h2 {
+                font-size: 1.4em;
+            }
+            .conference-icon {
+                top: -10px;
+                right: -10px;
+                padding: 10px;
+                font-size: 1.2em;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const conferences = [
+                {
+                    name: "Molecular Communications Conference",
+                    url: "https://www.molecularcommunications.eu/",
+                    deadline: new Date("2024-05-15T23:59:59"),
+                    conferenceDate: new Date("2024-06-10T00:00:00"),
+                    conferenceDateText: "June 10-12, 2024"
+                },
+                {
+                    name: "ACM NanoCom 2024",
+                    url: "https://nanocom.acm.org/nanocom2024/index.php",
+                    deadline: new Date("2024-06-01T23:59:59"),
+                    conferenceDate: new Date("2024-09-04T00:00:00"),
+                    conferenceDateText: "September 4-6, 2024"
+                },
+                {
+                    name: "IEEE Sensors Conference 2024",
+                    url: "https://2024.ieee-sensorsconference.org/",
+                    deadline: new Date("2024-04-10T23:59:59"),
+                    conferenceDate: new Date("2024-10-28T00:00:00"),
+                    conferenceDateText: "October 28-31, 2024"
+                },
+                {
+                    name: "IEEE ICC 2025",
+                    url: "https://icc2025.ieee-icc.org/",
+                    deadline: new Date("2025-01-15T23:59:59"),
+                    conferenceDate: new Date("2025-06-08T00:00:00"),
+                    conferenceDateText: "June 8-13, 2025"
+                },
+                {
+                    name: "IEEE Globecom 2024",
+                    url: "https://globecom2024.ieee-globecom.org/",
+                    deadline: new Date("2024-08-30T23:59:59"),
+                    conferenceDate: new Date("2024-12-09T00:00:00"),
+                    conferenceDateText: "December 9-13, 2024"
+                },
+                {
+                    name: "IEEE WCNC 2025",
+                    url: "https://wcnc2025.ieee-wcnc.org/",
+                    deadline: new Date("2025-03-01T23:59:59"),
+                    conferenceDate: new Date("2025-03-23T00:00:00"),
+                    conferenceDateText: "March 23-26, 2025"
+                }
+            ];
+
+            // Sort conferences into different categories
+            const now = new Date();
+            const upcomingConferences = conferences.filter(c => c.deadline > now);
+            const passedDeadlineUpcomingConference = conferences.filter(c => c.deadline <= now && c.conferenceDate > now);
+            const pastConferences = conferences.filter(c => c.conferenceDate <= now);
+
+            const container = document.querySelector('.container');
+            container.innerHTML = '';
+
+            // Function to create calendar link
+            function createCalendarLink(conference) {
+                const startDate = conference.deadline.toISOString().replace(/-|:|\.\d{3}/g, "");
+                const endDate = new Date(conference.deadline.getTime() + (60 * 60 * 1000)).toISOString().replace(/-|:|\.\d{3}/g, "");
+                const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(conference.name)}&dates=${startDate}/${endDate}&details=${encodeURIComponent('Submission Deadline')}&location=${encodeURIComponent(conference.url)}`;
+                return calendarUrl;
+            }
+
+            // Function to create conference elements
+            function createConferenceElement(conference) {
+                const conferenceElement = document.createElement('div');
+                conferenceElement.classList.add('conference');
+                conferenceElement.innerHTML = `
+                    <a href="${createCalendarLink(conference)}" target="_blank" class="conference-icon" title="Add to Calendar">
+                        <i class="fas fa-calendar-alt"></i>
+                    </a>
+                    <h2>${conference.name}</h2>
+                    <p><a href="${conference.url}" target="_blank">Visit Conference Website</a></p>
+                    <p><strong>Submission Deadline:</strong> <span>${conference.deadline.toDateString()}</span></p>
+                    <p><strong>Conference Dates:</strong> ${conference.conferenceDateText}</p>
+                    <p class="countdown" id="${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown"></p>
+                `;
+                return conferenceElement;
+            }
+
+            // Display upcoming conferences
+            if (upcomingConferences.length > 0) {
+                const upcomingHeader = document.createElement('h2');
+                upcomingHeader.textContent = "Upcoming Conferences";
+                upcomingHeader.style.color = '#1d3557';
+                upcomingHeader.style.marginTop = '40px';
+                container.appendChild(upcomingHeader);
+                upcomingConferences.forEach(conference => {
+                    container.appendChild(createConferenceElement(conference));
+                });
+            }
+
+            // Display passed deadline but yet to take place conferences
+            if (passedDeadlineUpcomingConference.length > 0) {
+                const passedHeader = document.createElement('h2');
+                passedHeader.textContent = "Conferences with Passed Deadlines but Upcoming Dates";
+                passedHeader.style.color = '#1d3557';
+                passedHeader.style.marginTop = '40px';
+                container.appendChild(passedHeader);
+                passedDeadlineUpcomingConference.forEach(conference => {
+                    container.appendChild(createConferenceElement(conference));
+                });
+            }
+
+            // Display past conferences
+            if (pastConferences.length > 0) {
+                const pastHeader = document.createElement('h2');
+                pastHeader.textContent = "Past Conferences";
+                pastHeader.style.color = '#1d3557';
+                pastHeader.style.marginTop = '40px';
+                container.appendChild(pastHeader);
+                pastConferences.forEach(conference => {
+                    container.appendChild(createConferenceElement(conference));
+                });
+            }
+
+            // Update countdowns
+            function updateCountdowns() {
+                upcomingConferences.forEach(conference => {
+                    const now = new Date();
+                    const timeDifference = conference.deadline - now;
+
+                    if (timeDifference > 0) {
+                        const months = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30));
+                        const days = Math.floor((timeDifference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+                        let countdownText = `Time left: ${months}mo ${days}d ${hours}h ${minutes}m`;
+                        if (timeDifference < (1000 * 60 * 60)) { // Show seconds only if less than an hour left
+                            countdownText += ` ${seconds}s`;
+                        }
+
+                        document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
+                    } else {
+                        document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText
+
+                        document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText =
+                            `Deadline has passed`;
+                    }
+                });
+            }
+
+            setInterval(updateCountdowns, 1000);
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Research Submission Deadlines Tracker</h1>
+    </header>
+    <div class="container"></div>
+</body>
+</html>
