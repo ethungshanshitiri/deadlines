@@ -3,94 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research Submission Deadlines Tracker</title>
+    <title>Conference Submission Deadlines</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@300;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Open+Sans:wght@300;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             padding: 0;
             margin: 0;
             font-family: 'Roboto', sans-serif;
-            background-color: #f9fafc;
+            background-color: #f4f5f7;
             color: #333;
         }
         header {
-            background: linear-gradient(to right, #1d3557, #457b9d);
+            background: linear-gradient(to right, #00264d, #005580);
             color: #fff;
-            padding: 40px;
+            padding: 80px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            border-bottom-left-radius: 50% 15px;
+            border-bottom-right-radius: 50% 15px;
         }
         header h1 {
             font-weight: 700;
             margin: 0;
-            font-size: 2.5em;
+            font-size: 3em;
             letter-spacing: 1px;
         }
         .container {
             max-width: 1200px;
-            margin: 40px auto;
+            margin: 80px auto;
             padding: 0 20px;
         }
         .conference {
-            margin-bottom: 40px;
-            border: 1px solid #e1e5ea;
-            padding: 30px;
-            border-radius: 15px;
+            margin-bottom: 50px;
+            padding: 40px;
+            border-radius: 20px;
             background: #ffffff;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
+            overflow: hidden;
         }
         .conference:hover {
             transform: translateY(-10px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
         }
         .conference h2 {
             margin-bottom: 15px;
-            color: #1d3557;
+            color: #005580;
             font-family: 'Open Sans', sans-serif;
             font-weight: 600;
-            font-size: 1.8em;
+            font-size: 2em;
         }
         .conference a {
-            color: #e63946;
+            color: #004080;
             text-decoration: none;
             font-weight: 700;
             transition: color 0.3s ease;
         }
         .conference a:hover {
-            color: #457b9d;
+            color: #00264d;
             text-decoration: underline;
         }
         .conference p {
             margin: 15px 0;
-            line-height: 1.6;
+            line-height: 1.8;
             font-size: 1.1em;
         }
         .countdown {
             font-size: 1.2em;
-            color: #e63946;
+            color: #d32f2f;
             font-weight: bold;
         }
         .conference-icon {
             position: absolute;
-            top: -20px;
-            right: -20px;
-            background-color: #457b9d;
+            top: -25px;
+            right: -25px;
+            background-color: #005580;
             color: #fff;
-            padding: 15px;
+            padding: 25px;
             border-radius: 50%;
-            font-size: 1.5em;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            font-size: 1.8em;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
         .conference-icon:hover {
-            background-color: #1d3557;
+            background-color: #00264d;
         }
         @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5em;
+            }
+            .conference {
+                padding: 30px;
+            }
+            .conference h2 {
+                font-size: 1.8em;
+            }
+            .container {
+                padding: 0 15px;
+            }
+        }
+        @media (max-width: 480px) {
             header h1 {
                 font-size: 2.2em;
             }
@@ -100,25 +116,11 @@
             .conference h2 {
                 font-size: 1.6em;
             }
-            .container {
-                padding: 0 15px;
-            }
-        }
-        @media (max-width: 480px) {
-            header h1 {
-                font-size: 2em;
-            }
-            .conference {
-                padding: 15px;
-            }
-            .conference h2 {
-                font-size: 1.4em;
-            }
             .conference-icon {
-                top: -10px;
-                right: -10px;
-                padding: 10px;
-                font-size: 1.2em;
+                top: -15px;
+                right: -15px;
+                padding: 15px;
+                font-size: 1.5em;
             }
         }
     </style>
@@ -207,7 +209,7 @@
             if (upcomingConferences.length > 0) {
                 const upcomingHeader = document.createElement('h2');
                 upcomingHeader.textContent = "Upcoming Conferences";
-                upcomingHeader.style.color = '#1d3557';
+                upcomingHeader.style.color = '#00264d';
                 upcomingHeader.style.marginTop = '40px';
                 container.appendChild(upcomingHeader);
                 upcomingConferences.forEach(conference => {
@@ -219,7 +221,7 @@
             if (passedDeadlineUpcomingConference.length > 0) {
                 const passedHeader = document.createElement('h2');
                 passedHeader.textContent = "Conferences with Passed Deadlines but Upcoming Dates";
-                passedHeader.style.color = '#1d3557';
+                passedHeader.style.color = '#00264d';
                 passedHeader.style.marginTop = '40px';
                 container.appendChild(passedHeader);
                 passedDeadlineUpcomingConference.forEach(conference => {
@@ -231,7 +233,7 @@
             if (pastConferences.length > 0) {
                 const pastHeader = document.createElement('h2');
                 pastHeader.textContent = "Past Conferences";
-                pastHeader.style.color = '#1d3557';
+                pastHeader.style.color = '#00264d';
                 pastHeader.style.marginTop = '40px';
                 container.appendChild(pastHeader);
                 pastConferences.forEach(conference => {
@@ -259,8 +261,6 @@
 
                         document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
                     } else {
-                        document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText
-
                         document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText =
                             `Deadline has passed`;
                     }
@@ -273,7 +273,7 @@
 </head>
 <body>
     <header>
-        <h1>Research Submission Deadlines Tracker</h1>
+        <h1>Upcoming Conference Submission Deadlines</h1>
     </header>
     <div class="container"></div>
 </body>
