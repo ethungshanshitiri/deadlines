@@ -144,8 +144,7 @@
             const now = new Date();
             return {
                 upcoming: conferences.filter(c => c.deadline > now),
-                passedDeadlineUpcoming: conferences.filter(c => c.deadline <= now && c.conferenceDate > now),
-                past: conferences.filter(c => c.conferenceDate <= now)
+                past: conferences.filter(c => c.deadline <= now)
             };
         }
 
@@ -170,7 +169,7 @@
 
             if (categorizedConferences.upcoming.length > 0) {
                 const upcomingHeader = document.createElement('h2');
-                upcomingHeader.textContent = "Upcoming Conferences";
+                upcomingHeader.textContent = "Upcoming Deadlines";
                 upcomingHeader.style.color = '#00264d';
                 upcomingHeader.style.marginTop = '40px';
                 container.appendChild(upcomingHeader);
@@ -179,20 +178,9 @@
                 });
             }
 
-            if (categorizedConferences.passedDeadlineUpcoming.length > 0) {
-                const passedHeader = document.createElement('h2');
-                passedHeader.textContent = "Conferences with Passed Deadlines but Upcoming Dates";
-                passedHeader.style.color = '#00264d';
-                passedHeader.style.marginTop = '40px';
-                container.appendChild(passedHeader);
-                categorizedConferences.passedDeadlineUpcoming.forEach(conference => {
-                    container.appendChild(createConferenceElement(conference));
-                });
-            }
-
             if (categorizedConferences.past.length > 0) {
                 const pastHeader = document.createElement('h2');
-                pastHeader.textContent = "Past Conferences";
+                pastHeader.textContent = "Past Deadlines";
                 pastHeader.style.color = '#00264d';
                 pastHeader.style.marginTop = '40px';
                 container.appendChild(pastHeader);
@@ -231,7 +219,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             const conferences = [
                 {
-                    name: "Molecular Communications 2025",
+                    name: "Molecular Communications Conference",
                     url: "https://molecularcommunications.org/",
                     deadline: new Date("2025-01-25T00:00:00"),
                     conferenceDate: new Date("2025-04-10T00:00:00"),
@@ -248,7 +236,7 @@
                     name: "IEEE Sensors Conference 2025",
                     url: "https://0205.ieee-sensorsconference.org/",
                     deadline: new Date("2025-06-18T23:59:59"),
-                    conferenceDate: new Date("2025-10-19T00:00:00"),
+                    conferenceDate: new Date("2024-10-19T00:00:00"),
                     conferenceDateText: "October 19-22, 2025"
                 },
                 {
