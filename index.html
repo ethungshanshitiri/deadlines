@@ -329,6 +329,7 @@
             ];
 
             const validConferences = conferences.filter(validateConferenceData);
+            validConferences.sort((a, b) => a.deadline - b.deadline);
             const categorizedConferences = categorizeConferences(validConferences);
             const container = document.querySelector('.container');
 
