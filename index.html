@@ -14,29 +14,32 @@
             font-family: '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
             background-color: #f4f5f7;
             color: #333;
+            -webkit-font-smoothing: antialiased;
         }
         header {
             background: linear-gradient(to right, #00264d, #005580);
             color: #fff;
-            padding: 80px;
+            padding: 60px 20px;
             text-align: center;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
             border-bottom-left-radius: 50% 15px;
             border-bottom-right-radius: 50% 15px;
         }
         header h1 {
-            font-weight: 700;
+            font-weight: 200;
             margin: 0;
             font-size: 3em;
             letter-spacing: 1px;
         }
         .container {
             max-width: 1200px;
-            margin: 80px auto;
+            margin: 60px auto;
             padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
         }
         .conference {
-            margin-bottom: 50px;
             padding: 40px;
             border-radius: 20px;
             background: #ffffff;
@@ -91,6 +94,23 @@
         }
         .conference-icon:hover {
             background-color: #00264d;
+        }
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #00264d;
+            color: #fff;
+            margin-top: 60px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        footer a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        footer a:hover {
+            color: #005580;
         }
         @media (max-width: 768px) {
             header h1 {
@@ -245,8 +265,6 @@
                     }
 
                     document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
-                } else {
-                    
                 }
             });
             requestAnimationFrame(() => updateCountdowns(conferences));
@@ -319,10 +337,8 @@
         <h1>Submission Deadlines - InBody Nanonetworks</h1>
     </header>
     <div class="container"></div>
-    <footer style="text-align: center; padding: 20px; background-color: #00264d; color: #fff; margin-top: 40px;">
-        <p>© 2024 Ethungshan Shitiri <a href="https://www.linkedin.com/in/ethungshan-shitiri/" target="_blank" style="color: #fff; margin-left: 10px;"><i class="fab fa-linkedin"></i></a></p>
-            <a href="https://www.linkedin.com/in/ethungshan-shitiri/" target="_blank" style="color: #fff; text-decoration: none; margin-left: 10px;">
-        </a>
+    <footer>
+        <p>© 2024 Ethungshan Shitiri <a href="https://www.linkedin.com/in/ethungshan-shitiri/" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a></p>
     </footer>
 </body>
 </html>
