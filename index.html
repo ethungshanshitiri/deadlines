@@ -14,6 +14,7 @@
             font-family: '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
             background-color: #f4f5f7;
             color: #333;
+            font-size: 15px;
             -webkit-font-smoothing: antialiased;
         }
         header {
@@ -62,7 +63,7 @@
             color: #005580;
             font-family: '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
             font-weight: 600;
-            font-size: 2em;
+            font-size: 1.5em;
         }
         .conference a {
             color: #004080;
@@ -153,34 +154,22 @@
         function createCalendarLink(conference) {
             const startDate = conference.deadline.toISOString().replace(/-|:|\.\d{3}/g, "");
             const endDate = new Date(conference.deadline.getTime() + (60 * 60 * 1000)).toISOString().replace(/-|:|\.\d{3}/g, "");
+            if (detectDevice() === "iOS") {
+                const calendarUrl = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${conference.name}\nDTSTART:${startDate}\nDTEND:${endDate}\nLOCATION:${conference.url}\nDESCRIPTION:Submission Deadline\nEND:VEVENT\nEND:VCALENDAR`;
+                const blob = new Blob([calendarUrl], { type: 'text/calendar' });
+                const link = URL.createObjectURL(blob);
+                setTimeout(() => URL.revokeObjectURL(link), 10000);
+                return link;
+            }
             return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(conference.name)}&dates=${startDate}/${endDate}&details=${encodeURIComponent('Submission Deadline')}&location=${encodeURIComponent(conference.url)}`;
-        }
-
-        function createIOSCalendarLink(conference) {
-            const startDate = conference.deadline.toISOString().replace(/-|:|\.\d{3}/g, "").substring(0, 15);
-            const endDate = new Date(conference.deadline.getTime() + (60 * 60 * 1000)).toISOString().replace(/-|:|\.\d{3}/g, "").substring(0, 15);
-            const calendarUrl = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${conference.name}\nDTSTART:${startDate}\nDTEND:${endDate}\nLOCATION:${conference.url}\nDESCRIPTION:Submission Deadline\nEND:VEVENT\nEND:VCALENDAR`;
-            const blob = new Blob([calendarUrl], { type: 'text/calendar' });
-            return URL.createObjectURL(blob);
         }
 
         function detectDevice() {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            if (/windows phone/i.test(userAgent)) {
-                return "Windows";
-            }
-            if (/android/i.test(userAgent)) {
-                return "Android";
-            }
-            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            if (/windows phone|android|iPad|iPhone|iPod/i.test(userAgent) && !window.MSStream) {
                 return "iOS";
             }
             return "unknown";
-        }
-
-        function getCalendarLink(conference) {
-            const deviceType = detectDevice();
-            return deviceType === "iOS" ? createIOSCalendarLink(conference) : createCalendarLink(conference);
         }
 
         function validateConferenceData(conference) {
@@ -202,96 +191,82 @@
         }
 
         function createConferenceElement(conference) {
-            const conferenceElement = document.createElement('div');
-            conferenceElement.classList.add('conference');
-            conferenceElement.innerHTML = `
-                <a href="${getCalendarLink(conference)}" target="_blank" class="conference-icon" title="Add to Calendar">
-                    <i class="fas fa-calendar-alt"></i>
-                </a>
-                <h2>${conference.name}</h2>
-                <p><a href="${conference.url}" target="_blank">${conference.isJournal ? 'Visit Journal Website' : 'Visit Conference Website'}</a></p>
-                <p><strong>Submission Deadline:</strong> <span>${conference.deadline.toDateString()}</span></p>
-                <p><strong>${conference.isJournal ? 'Publication Date' : 'Conference Dates'}:</strong> ${conference.conferenceDateText}</p>
-                <p class="countdown" id="${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown"></p>
+            return `
+                <div class="conference">
+                    <a href="${createCalendarLink(conference)}" target="_blank" class="conference-icon" title="Add to Calendar">
+                        <i class="fas fa-calendar-alt"></i>
+                    </a>
+                    <h2>${conference.name}</h2>
+                    <p><a href="${conference.url}" target="_blank">${conference.isJournal ? 'Visit Journal Website' : 'Visit Conference Website'}</a></p>
+                    <p><strong>Submission Deadline:</strong> <span>${conference.deadline.toDateString()}</span></p>
+                    <p><strong>${conference.isJournal ? 'Publication Date' : 'Conference Dates'}:</strong> ${conference.conferenceDateText}</p>
+                    <p class="countdown" id="${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown"></p>
+                </div>
             `;
-            return conferenceElement;
         }
 
         function displayConferences(container, categorizedConferences) {
-            container.innerHTML = '';
+            let content = '';
 
             if (categorizedConferences.upcomingConferences.length > 0) {
-                const upcomingConferencesHeader = document.createElement('h2');
-                upcomingConferencesHeader.textContent = "Upcoming Conferences";
-                upcomingConferencesHeader.style.color = '#00264d';
-                upcomingConferencesHeader.style.marginTop = '40px';
-                container.appendChild(upcomingConferencesHeader);
+                content += '<h2 style="color: #00264d; margin-top: 40px;">Upcoming Conferences</h2>';
                 categorizedConferences.upcomingConferences.forEach(conference => {
-                    container.appendChild(createConferenceElement(conference));
+                    content += createConferenceElement(conference);
                 });
             }
 
             if (categorizedConferences.upcomingJournals.length > 0) {
-                const upcomingJournalsHeader = document.createElement('h2');
-                upcomingJournalsHeader.textContent = "Upcoming Journals";
-                upcomingJournalsHeader.style.color = '#00264d';
-                upcomingJournalsHeader.style.marginTop = '40px';
-                container.appendChild(upcomingJournalsHeader);
+                content += '<h2 style="color: #00264d; margin-top: 40px;">Upcoming Journals</h2>';
                 categorizedConferences.upcomingJournals.forEach(journal => {
-                    container.appendChild(createConferenceElement(journal));
+                    content += createConferenceElement(journal);
                 });
             }
 
             if (categorizedConferences.pastConferences.length > 0) {
-                const pastConferencesHeader = document.createElement('h2');
-                pastConferencesHeader.textContent = "Past Conferences";
-                pastConferencesHeader.style.color = '#00264d';
-                pastConferencesHeader.style.marginTop = '40px';
-                container.appendChild(pastConferencesHeader);
+                content += '<h2 style="color: #00264d; margin-top: 40px;">Past Conferences</h2>';
                 categorizedConferences.pastConferences.forEach(conference => {
-                    container.appendChild(createConferenceElement(conference));
+                    content += createConferenceElement(conference);
                 });
             }
 
             if (categorizedConferences.pastJournals.length > 0) {
-                const pastJournalsHeader = document.createElement('h2');
-                pastJournalsHeader.textContent = "Past Journals";
-                pastJournalsHeader.style.color = '#00264d';
-                pastJournalsHeader.style.marginTop = '40px';
-                container.appendChild(pastJournalsHeader);
+                content += '<h2 style="color: #00264d; margin-top: 40px;">Past Journals</h2>';
                 categorizedConferences.pastJournals.forEach(journal => {
-                    container.appendChild(createConferenceElement(journal));
+                    content += createConferenceElement(journal);
                 });
             }
+
+            container.innerHTML = content;
         }
 
         function updateCountdowns(conferences) {
-            conferences.forEach(conference => {
-                const now = new Date();
-                const timeDifference = conference.deadline - now;
+            const updateInterval = setInterval(() => {
+                conferences.forEach(conference => {
+                    const now = new Date();
+                    const timeDifference = conference.deadline - now;
 
-                let countdownText = '';
-                if (timeDifference > 0) {
-                    const months = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30));
-                    const days = Math.floor((timeDifference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+                    let countdownText = '';
+                    if (timeDifference > 0) {
+                        const months = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30));
+                        const days = Math.floor((timeDifference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
-                    if (months > 0) {
-                        countdownText = `Time left: ${months}mo ${days}d`;
-                    } else if (days > 0) {
-                        countdownText = `Time left: ${days}d ${hours}h`;
-                    } else if (hours > 0) {
-                        countdownText = `Time left: ${hours}h ${minutes}m`;
-                    } else {
-                        countdownText = `Time left: ${minutes}m ${seconds}s`;
+                        if (months > 0) {
+                            countdownText = `Time left: ${months}mo ${days}d`;
+                        } else if (days > 0) {
+                            countdownText = `Time left: ${days}d ${hours}h`;
+                        } else if (hours > 0) {
+                            countdownText = `Time left: ${hours}h ${minutes}m`;
+                        } else {
+                            countdownText = `Time left: ${minutes}m ${seconds}s`;
+                        }
+
+                        document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
                     }
-
-                    document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
-                }
-            });
-            setTimeout(() => updateCountdowns(conferences), 1000);
+                });
+            }, 1000);
         }
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -332,7 +307,7 @@
                     name: "IEEE Sensors Conference 2025",
                     url: "https://0205.ieee-sensorsconference.org/",
                     deadline: new Date("2025-06-18T23:59:59"),
-                    conferenceDate: new Date("2024-10-19T00:00:00"),
+                    conferenceDate: new Date("2025-10-19T00:00:00"),
                     conferenceDateText: "October 19-22, 2025",
                     isJournal: false
                 },
@@ -365,7 +340,7 @@
                     url: "https://bodynets.eai-conferences.org/2024/",
                     deadline: new Date("2024-11-10T23:59:59"),
                     conferenceDate: new Date("2024-12-15T00:00:00"),
-                    conferenceDateText: "Dec 15-18, 2024",
+                    conferenceDateText: "December 15-18, 2024",
                     isJournal: false
                 }
             ];
