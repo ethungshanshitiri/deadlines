@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +18,7 @@
             font-size: 15px;
             -webkit-font-smoothing: antialiased;
         }
+
         header {
             background: linear-gradient(to right, #00264d, #005580);
             color: #fff;
@@ -26,17 +28,20 @@
             border-bottom-left-radius: 50% 15px;
             border-bottom-right-radius: 50% 15px;
         }
+
         header h1 {
             font-weight: 200;
             margin: 0;
             font-size: 3em;
             letter-spacing: 1px;
         }
+
         header p {
             font-size: clamp(1rem, 20vw, 1.5rem);
             font-weight: 200;
             margin-top: 10px;
         }
+
         .container {
             max-width: 800px;
             margin: 60px auto;
@@ -45,6 +50,7 @@
             flex-direction: column;
             gap: 40px;
         }
+
         .conference {
             padding: 40px;
             border-radius: 20px;
@@ -54,10 +60,12 @@
             position: relative;
             overflow: hidden;
         }
+
         .conference:hover {
             transform: translateY(-10px);
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
         }
+
         .conference h2 {
             margin-bottom: 15px;
             color: #005580;
@@ -65,26 +73,31 @@
             font-weight: 600;
             font-size: 1.5em;
         }
+
         .conference a {
             color: #004080;
             text-decoration: none;
             font-weight: 700;
             transition: color 0.3s ease;
         }
+
         .conference a:hover {
             color: #00264d;
             text-decoration: underline;
         }
+
         .conference p {
             margin: 15px 0;
             line-height: 1.8;
             font-size: 1.1em;
         }
+
         .countdown {
             font-size: 1.2em;
             color: #d32f2f;
             font-weight: bold;
         }
+
         .conference-icon {
             position: absolute;
             top: -25px;
@@ -98,9 +111,11 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         .conference-icon:hover {
             background-color: #00264d;
         }
+
         footer {
             text-align: center;
             padding: 40px 20px;
@@ -110,14 +125,17 @@
             font-size: 1.1em;
             line-height: 1.6;
         }
+
         footer a {
             color: #fff;
             text-decoration: none;
             transition: color 0.3s ease;
         }
+
         footer a:hover {
             color: #005580;
         }
+
         @media (max-width: 768px) {
             header h1 {
                 font-size: 2.5em;
@@ -132,6 +150,7 @@
                 padding: 0 15px;
             }
         }
+
         @media (max-width: 480px) {
             header h1 {
                 font-size: 2.2em;
@@ -155,14 +174,12 @@
             const startDate = conference.deadline.toISOString().replace(/-|:|\.\d{3}/g, "");
             const endDate = new Date(conference.deadline.getTime() + (60 * 60 * 1000)).toISOString().replace(/-|:|\.\d{3}/g, "");
             if (detectDevice() === "iOS") {
-                const calendarUrl = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${conference.name}\nDTSTART:${startDate}\nDTEND:${endDate}\nLOCATION:${conference.url}\nDESCRIPTION:Submission Deadline\nEND:VEVENT\nEND:VCALENDAR`;
-                const blob = new Blob([calendarUrl], { type: 'text/calendar' });
-                const link = URL.createObjectURL(blob);
-                setTimeout(() => URL.revokeObjectURL(link), 10000);
-                return link;
+                // Construct the URL in a format that iOS can use to open iCalendar directly
+                return `webcal://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(conference.name)}&dates=${startDate}/${endDate}&details=${encodeURIComponent('Submission Deadline')}&location=${encodeURIComponent(conference.url)}`;
             }
             return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(conference.name)}&dates=${startDate}/${endDate}&details=${encodeURIComponent('Submission Deadline')}&location=${encodeURIComponent(conference.url)}`;
         }
+
 
         function detectDevice() {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -174,10 +191,10 @@
 
         function validateConferenceData(conference) {
             return conference.hasOwnProperty('name') &&
-                   conference.hasOwnProperty('url') &&
-                   conference.hasOwnProperty('deadline') &&
-                   conference.hasOwnProperty('conferenceDate') &&
-                   conference.hasOwnProperty('conferenceDateText');
+                conference.hasOwnProperty('url') &&
+                conference.hasOwnProperty('deadline') &&
+                conference.hasOwnProperty('conferenceDate') &&
+                conference.hasOwnProperty('conferenceDateText');
         }
 
         function categorizeConferences(conferences) {
@@ -270,8 +287,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            const conferences = [
-                {
+            const conferences = [{
                     name: "Interconnecting Molecular and Terahertz Communications for Future 6G/7G Networks",
                     url: "https://www.comsoc.org/publications/journals/ieee-tmbmc/cfp/interconnecting-molecular-and-terahertz-communications-future",
                     deadline: new Date("2025-04-15T00:00:00"),
@@ -354,6 +370,7 @@
         });
     </script>
 </head>
+
 <body>
     <header>
         <h1>Submission Deadlines</h1>
@@ -364,4 +381,5 @@
         <p>© 2024 Ethungshan Shitiri <a href="https://www.linkedin.com/in/ethungshan-shitiri/" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a></p>
     </footer>
 </body>
+
 </html>
