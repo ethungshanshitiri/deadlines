@@ -153,8 +153,7 @@
         function createCalendarLink(conference) {
             const startDate = conference.deadline.toISOString().replace(/-|:|\.\d{3}/g, "");
             const endDate = new Date(conference.deadline.getTime() + (60 * 60 * 1000)).toISOString().replace(/-|:|\.\d{3}/g, "");
-            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(conference.name)}&dates=${startDate}/${endDate}&details=${encodeURIComponent('Submission Deadline')}&location=${encodeURIComponent(conference.url)}`;
-            return calendarUrl;
+            return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(conference.name)}&dates=${startDate}/${endDate}&details=${encodeURIComponent('Submission Deadline')}&location=${encodeURIComponent(conference.url)}`;
         }
 
         function createIOSCalendarLink(conference) {
@@ -181,11 +180,7 @@
 
         function getCalendarLink(conference) {
             const deviceType = detectDevice();
-            if (deviceType === "iOS") {
-                return createIOSCalendarLink(conference);
-            } else {
-                return createCalendarLink(conference);
-            }
+            return deviceType === "iOS" ? createIOSCalendarLink(conference) : createCalendarLink(conference);
         }
 
         function validateConferenceData(conference) {
@@ -199,8 +194,10 @@
         function categorizeConferences(conferences) {
             const now = new Date();
             return {
-                upcoming: conferences.filter(c => c.deadline > now),
-                past: conferences.filter(c => c.deadline <= now)
+                upcomingConferences: conferences.filter(c => c.deadline > now && !c.isJournal),
+                upcomingJournals: conferences.filter(c => c.deadline > now && c.isJournal),
+                pastConferences: conferences.filter(c => c.deadline <= now && !c.isJournal),
+                pastJournals: conferences.filter(c => c.deadline <= now && c.isJournal)
             };
         }
 
@@ -212,9 +209,9 @@
                     <i class="fas fa-calendar-alt"></i>
                 </a>
                 <h2>${conference.name}</h2>
-                <p><a href="${conference.url}" target="_blank">Visit Conference Website</a></p>
+                <p><a href="${conference.url}" target="_blank">${conference.isJournal ? 'Visit Journal Website' : 'Visit Conference Website'}</a></p>
                 <p><strong>Submission Deadline:</strong> <span>${conference.deadline.toDateString()}</span></p>
-                <p><strong>Conference Dates:</strong> ${conference.conferenceDateText}</p>
+                <p><strong>${conference.isJournal ? 'Publication Date' : 'Conference Dates'}:</strong> ${conference.conferenceDateText}</p>
                 <p class="countdown" id="${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown"></p>
             `;
             return conferenceElement;
@@ -223,25 +220,47 @@
         function displayConferences(container, categorizedConferences) {
             container.innerHTML = '';
 
-            if (categorizedConferences.upcoming.length > 0) {
-                const upcomingHeader = document.createElement('h2');
-                upcomingHeader.textContent = "Upcoming Deadlines";
-                upcomingHeader.style.color = '#00264d';
-                upcomingHeader.style.marginTop = '40px';
-                container.appendChild(upcomingHeader);
-                categorizedConferences.upcoming.forEach(conference => {
+            if (categorizedConferences.upcomingConferences.length > 0) {
+                const upcomingConferencesHeader = document.createElement('h2');
+                upcomingConferencesHeader.textContent = "Upcoming Conferences";
+                upcomingConferencesHeader.style.color = '#00264d';
+                upcomingConferencesHeader.style.marginTop = '40px';
+                container.appendChild(upcomingConferencesHeader);
+                categorizedConferences.upcomingConferences.forEach(conference => {
                     container.appendChild(createConferenceElement(conference));
                 });
             }
 
-            if (categorizedConferences.past.length > 0) {
-                const pastHeader = document.createElement('h2');
-                pastHeader.textContent = "Past Deadlines";
-                pastHeader.style.color = '#00264d';
-                pastHeader.style.marginTop = '40px';
-                container.appendChild(pastHeader);
-                categorizedConferences.past.forEach(conference => {
+            if (categorizedConferences.upcomingJournals.length > 0) {
+                const upcomingJournalsHeader = document.createElement('h2');
+                upcomingJournalsHeader.textContent = "Upcoming Journals";
+                upcomingJournalsHeader.style.color = '#00264d';
+                upcomingJournalsHeader.style.marginTop = '40px';
+                container.appendChild(upcomingJournalsHeader);
+                categorizedConferences.upcomingJournals.forEach(journal => {
+                    container.appendChild(createConferenceElement(journal));
+                });
+            }
+
+            if (categorizedConferences.pastConferences.length > 0) {
+                const pastConferencesHeader = document.createElement('h2');
+                pastConferencesHeader.textContent = "Past Conferences";
+                pastConferencesHeader.style.color = '#00264d';
+                pastConferencesHeader.style.marginTop = '40px';
+                container.appendChild(pastConferencesHeader);
+                categorizedConferences.pastConferences.forEach(conference => {
                     container.appendChild(createConferenceElement(conference));
+                });
+            }
+
+            if (categorizedConferences.pastJournals.length > 0) {
+                const pastJournalsHeader = document.createElement('h2');
+                pastJournalsHeader.textContent = "Past Journals";
+                pastJournalsHeader.style.color = '#00264d';
+                pastJournalsHeader.style.marginTop = '40px';
+                container.appendChild(pastJournalsHeader);
+                categorizedConferences.pastJournals.forEach(journal => {
+                    container.appendChild(createConferenceElement(journal));
                 });
             }
         }
@@ -272,64 +291,86 @@
                     document.getElementById(`${conference.name.replace(/\s+/g, '-').toLowerCase()}-countdown`).innerText = countdownText;
                 }
             });
-            requestAnimationFrame(() => updateCountdowns(conferences));
+            setTimeout(() => updateCountdowns(conferences), 1000);
         }
 
         document.addEventListener("DOMContentLoaded", function() {
             const conferences = [
                 {
+                    name: "Interconnecting Molecular and Terahertz Communications for Future 6G/7G Networks",
+                    url: "https://www.comsoc.org/publications/journals/ieee-tmbmc/cfp/interconnecting-molecular-and-terahertz-communications-future",
+                    deadline: new Date("2025-04-15T00:00:00"),
+                    conferenceDate: new Date("2025-12-01T00:00:00"),
+                    conferenceDateText: "December 2025",
+                    isJournal: true
+                },
+                {
+                    name: "The Internet of BioNanoThings – Applications, Components, and Challenges",
+                    url: "https://www.comsoc.org/publications/journals/ieee-tmbmc/cfp/internet-bionanothings-applications-components-and-challenges",
+                    deadline: new Date("2025-04-01T00:00:00"),
+                    conferenceDate: new Date("2025-12-01T00:00:00"),
+                    conferenceDateText: "December 2025",
+                    isJournal: true
+                },
+                {
                     name: "Molecular Communications 2025",
                     url: "https://molecularcommunications.org/",
                     deadline: new Date("2025-01-25T00:00:00"),
                     conferenceDate: new Date("2025-04-10T00:00:00"),
-                    conferenceDateText: "April 9-11, 2025"
+                    conferenceDateText: "April 9-11, 2025",
+                    isJournal: false
                 },
                 {
                     name: "ACM NanoCom 2024",
                     url: "https://nanocom.acm.org/nanocom2024/index.php",
                     deadline: new Date("2024-06-04T23:59:59"),
                     conferenceDate: new Date("2024-10-28T00:00:00"),
-                    conferenceDateText: "October 28-30, 2024"
+                    conferenceDateText: "October 28-30, 2024",
+                    isJournal: false
                 },
                 {
                     name: "IEEE Sensors Conference 2025",
                     url: "https://0205.ieee-sensorsconference.org/",
                     deadline: new Date("2025-06-18T23:59:59"),
                     conferenceDate: new Date("2024-10-19T00:00:00"),
-                    conferenceDateText: "October 19-22, 2025"
+                    conferenceDateText: "October 19-22, 2025",
+                    isJournal: false
                 },
                 {
                     name: "IEEE ICC 2025",
                     url: "https://icc2025.ieee-icc.org/",
                     deadline: new Date("2024-08-11T00:00:00"),
                     conferenceDate: new Date("2025-06-08T00:00:00"),
-                    conferenceDateText: "June 8-12, 2025"
+                    conferenceDateText: "June 8-12, 2025",
+                    isJournal: false
                 },
                 {
                     name: "IEEE Globecom 2024",
                     url: "https://globecom2024.ieee-globecom.org/",
                     deadline: new Date("2024-04-30T23:59:59"),
                     conferenceDate: new Date("2024-12-08T00:00:00"),
-                    conferenceDateText: "December 8-12, 2024"
+                    conferenceDateText: "December 8-12, 2024",
+                    isJournal: false
                 },
                 {
                     name: "IEEE WCNC 2025",
                     url: "https://wcnc2025.ieee-wcnc.org/",
                     deadline: new Date("2025-08-14T23:59:59"),
                     conferenceDate: new Date("2025-03-24T00:00:00"),
-                    conferenceDateText: "March 24-27, 2025"
+                    conferenceDateText: "March 24-27, 2025",
+                    isJournal: false
                 },
                 {
                     name: "EAI BODYNETS",
                     url: "https://bodynets.eai-conferences.org/2024/",
                     deadline: new Date("2024-11-10T23:59:59"),
                     conferenceDate: new Date("2024-12-15T00:00:00"),
-                    conferenceDateText: "Dec 15-18, 2024"
+                    conferenceDateText: "Dec 15-18, 2024",
+                    isJournal: false
                 }
             ];
 
             const validConferences = conferences.filter(validateConferenceData);
-            validConferences.sort((a, b) => a.deadline - b.deadline);
             const categorizedConferences = categorizeConferences(validConferences);
             const container = document.querySelector('.container');
 
@@ -345,7 +386,7 @@
     </header>
     <div class="container"></div>
     <footer>
-         <p>© 2024 Ethungshan Shitiri <a href="https://www.linkedin.com/in/ethungshan-shitiri/" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a></p>
+        <p>© 2024 Ethungshan Shitiri <a href="https://www.linkedin.com/in/ethungshan-shitiri/" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a></p>
     </footer>
 </body>
 </html>
